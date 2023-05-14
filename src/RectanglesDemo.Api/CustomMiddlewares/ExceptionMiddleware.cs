@@ -6,9 +6,8 @@ namespace RectanglesDemo.Api.CustomMiddlewares;
 public class ExceptionMiddleware
 {
     private readonly RequestDelegate _next;
-    private readonly ILogger _logger;
-
-    public ExceptionMiddleware(RequestDelegate next, ILogger logger)
+    private readonly Serilog.ILogger _logger;
+    public ExceptionMiddleware(RequestDelegate next, Serilog.ILogger logger)
     {
         _logger = logger;
         _next = next;
@@ -22,7 +21,7 @@ public class ExceptionMiddleware
         }
         catch (Exception ex)
         {
-            _logger.LogError($"Something went wrong: {ex}");
+            _logger.Error($"Something went wrong: {ex}");
             await HandleExceptionAsync(httpContext, ex, HttpStatusCode.InternalServerError);
         }
     }

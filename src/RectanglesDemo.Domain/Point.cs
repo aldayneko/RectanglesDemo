@@ -1,7 +1,13 @@
 ﻿namespace RectanglesDemo.Domain;
 
-public class Point
+public struct Point
 {
-    public int X { get; set; }
-    public int Y { get; set; }
+    public double X { get; private set; }
+    public double Y { get; private set; }
+
+    public Point(double x, double y)
+    {
+        X = x;
+        Y = y;
+    }
 }

@@ -1,4 +1,6 @@
 ﻿using MediatR;
+using RectanglesDemo.Application.Common;
+using RectanglesDemo.Domain;
 
 namespace RectanglesDemo.Application.Commands;
 
@@ -14,8 +16,19 @@ public class PopulateRectanglesCommand : IRequest
 
 public class PopulateRectanglesCommandHandler : IRequestHandler<PopulateRectanglesCommand>
 {
-    public Task Handle(PopulateRectanglesCommand request, CancellationToken cancellationToken)
+    private readonly IRectanglesStorage _rectanglesStorage;
+
+    public PopulateRectanglesCommandHandler(IRectanglesStorage rectanglesStorage)
     {
-        throw new NotImplementedException();
+        _rectanglesStorage = rectanglesStorage;
+    }
+
+    public async Task Handle(PopulateRectanglesCommand request, CancellationToken cancellationToken)
+    {
+        await _rectanglesStorage.CheckAndCreateStorage();
+
+        var rectanglesFactory = new RectangleFactory();
+        var rectangles = rectanglesFactory.CreateRectangles(request.Count);
+        await _rectanglesStorage.Save(rectangles);
     }
 }
