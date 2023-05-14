@@ -65,6 +65,50 @@ public class RectanglesStorage : IRectanglesStorage
         return _connection.ExecuteAsync("truncate table rectangles");
     }
 
+    public Task<IEnumerable<Rectangle>> GetRectanglesWithPoint(Point point, int page, int pageSize)
+    {
+        var sql = @$"
+            with data as (
+            select * from {rectangleTable}
+            where 
+            (x1 < @x and x2 < @x and x3 < @x and x4 < @x) or (x1 > @x and x2 > @x and x3 > @x and x4 > @x) or
+            (y1 < @y and y2 < @y and y3 < @y and y4 < @y) or (y1 > @y and y2 > @y and y3 > @y and y4 > @y))
+
+            select *
+            from data
+            where 0 <= (x2 - x1)*(@x - x1) + (y2 - y1)*(@y - y1) and 
+                (x2 - x1)*(@x - x1) + (y2 - y1)*(@y - y1) <= (x2 - x1)*(x2 - x1) + (y2 - y1)*(y2 - y1) and
+		        0 <= (x3 - x2)*(@x - x2) + (x3 - x2)*(@y - y2) and
+                (x3 - x2)*(@x - x2) + (x3 - x2)*(@y - y2) <= (x3 - x2)*(x3 - x2) + (y3 - y2)*(y3 - y2)
+            order by id
+            OFFSET {page * pageSize} ROWS FETCH NEXT {pageSize} ROWS ONLY";
+        var parameters = new DynamicParameters();
+        parameters.Add("@x", point.X);
+        parameters.Add("@y", point.Y);
+        return _connection.QueryAsync<Rectangle>(sql, parameters);
+    }
+
+    public Task<int> GetCountRectanglesWithPoint(Point point)
+    {
+        var sql = @$"
+            with data as (
+            select * from {rectangleTable}
+            where 
+            (x1 < @x and x2 < @x and x3 < @x and x4 < @x) or (x1 > @x and x2 > @x and x3 > @x and x4 > @x) or
+            (y1 < @y and y2 < @y and y3 < @y and y4 < @y) or (y1 > @y and y2 > @y and y3 > @y and y4 > @y))
+
+            select count(*)
+            from data
+            where 0 <= (x2 - x1)*(@x - x1) + (y2 - y1)*(@y - y1) and 
+                (x2 - x1)*(@x - x1) + (y2 - y1)*(@y - y1) <= (x2 - x1)*(x2 - x1) + (y2 - y1)*(y2 - y1) and
+		        0 <= (x3 - x2)*(@x - x2) + (x3 - x2)*(@y - y2) and
+                (x3 - x2)*(@x - x2) + (x3 - x2)*(@y - y2) <= (x3 - x2)*(x3 - x2) + (y3 - y2)*(y3 - y2)";
+        var parameters = new DynamicParameters();
+        parameters.Add("@x", point.X);
+        parameters.Add("@y", point.Y);
+        return _connection.QueryFirstAsync<int>(sql, parameters);
+    }
+
     public async Task Save(IEnumerable<Rectangle> rectangles)
     {
         if (_connection.State != ConnectionState.Open)
@@ -122,10 +166,5 @@ public class RectanglesStorage : IRectanglesStorage
         }
 
         return table;
-    }
-
-    public Task<List<Rectangle>> GetRectanglesWithPoint(int x, int y)
-    {
-        throw new NotImplementedException();
     }
 }
