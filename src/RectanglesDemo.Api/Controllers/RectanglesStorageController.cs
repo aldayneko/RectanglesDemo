@@ -4,7 +4,7 @@ using RectanglesDemo.Application.Commands;
 
 namespace RectanglesDemo.Api.Controllers;
 
-//[Authorize]
+[Authorize]
 [ApiController]
 [Route("[controller]")]
 public class RectanglesStorageController : ApiControllerBase
