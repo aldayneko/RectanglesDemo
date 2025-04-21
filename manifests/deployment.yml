@@ -1,0 +1,19 @@
+apiVersion : apps/v1
+kind: Deployment
+metadata:
+  name: aldaynekorectanglesdemo 
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: aldaynekorectanglesdemo
+  template:
+    metadata:
+      labels:
+        app: aldaynekorectanglesdemo 
+    spec:
+      containers:
+        - name: aldaynekorectanglesdemo 
+          image: acrdevcontainerregistry.azurecr.io/aldaynekorectanglesdemo
+          ports:
+          - containerPort: 80
